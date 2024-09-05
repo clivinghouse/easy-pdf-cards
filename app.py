@@ -1,62 +1,91 @@
-from PyPDF2 import PdfReader, PdfWriter
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import landscape
 from reportlab.pdfgen import canvas
-from io import BytesIO
 
-
-def get_pdf_dimensions(pdf_path):
-    reader = PdfReader(pdf_path)
+def create_multiline_pdf(file_name, lines, x, font_name="Helvetica", font_size=12):
+    # Set up the canvas with landscape orientation
+    c = canvas.Canvas(file_name, pagesize=landscape(letter))
+    width, height = landscape(letter)
     
-    for i, page in enumerate(reader.pages):
-        media_box = page.mediabox
-        width = media_box.width
-        height = media_box.height
-        print(f"Page {i + 1}: Width = {width} pt, Height = {height} pt")
+    # Set the font name and size
+    c.setFont(font_name, font_size)
+    
+    # Apply rotation
+    c.translate(height,0)  # Move the origin to the center of the page
+    c.rotate(90)  # Rotate the canvas by 90 degrees clockwise
+    #c.translate(-height / 2, -width / 2)  # Move the origin back to the top-left corner of the rotated page
+    
+     # Set the starting position for the text
+    x_offset = width*x # Offset to the left
+    y_position = height-height*.09  # Starting position from the top of the page
+
+    # Set the space between lines and blocks
+    line_spacing = font_size + 2  # Space between lines within the same block
+    block_spacing = font_size + 105 # Space between different blocks (name/address pairs)
+    # Draw each block of lines
+    for i in range(0, len(lines), 4):
+        if i < len(lines):
+            c.drawString(x_offset, y_position, lines[i])
+        if i+1 < len(lines):
+            y_position -= line_spacing
+            c.drawString(x_offset, y_position, lines[i+1])
+        if i+2 < len(lines):
+            y_position -= line_spacing
+            c.drawString(x_offset, y_position, lines[i+2])  
+        if i+3 < len(lines):
+            y_position -= line_spacing
+            c.drawString(x_offset, y_position, lines[i+3])
+        
+        # Move down to the next block
+        y_position -= block_spacing
+    c.showPage()
+    c.save()
+
+# Define the lines with names, addresses, and city/state/zip
+lines = [
+"John Doe", "1234 Elm Street", "Springfield, IL 62704","",
+"Jane Smith", "5678 Oak Avenue", "Metropolis, IL 62960","",
+    "Alice Johnson", "9101 Maple Lane", "Gotham, NY 10001",""
+]
+
+# Create the content PDF with rotated text
+create_multiline_pdf("content_pdf.pdf", lines,.035, font_size=9)
 
 
 
+import PyPDF2
 
-def create_overlay(text, x, y):
-    packet = BytesIO()
-    # Create a new PDF with ReportLab
-    can = canvas.Canvas(packet)
-    can.drawString(x, y, text)
-    can.save()
-    packet.seek(0)
-    return packet
+def merge_pdfs(background_pdf, content_pdf, output_pdf):
+    # Read the background PDF
+    background = PyPDF2.PdfReader(background_pdf)
+    background_page = background.pages[0]
 
-def merge_pdfs(original_pdf_path, output_pdf_path, overlay):
-    # Read the original PDF
-    reader = PdfReader(original_pdf_path)
-    writer = PdfWriter()
+    # Read the content PDF
+    content = PyPDF2.PdfReader(content_pdf)
+    content_page = content.pages[0].rotate(90)
 
-    # Read the overlay PDF
-    overlay_pdf = PdfReader(overlay)
+    # Rotate the content page by 90 degrees clockwise
+    #content_page.rotate(90)
 
-    # Go through all pages and add the overlay
-    for i in range(len(reader.pages)):
-        original_page = reader.pages[i]
-        overlay_page = overlay_pdf.pages[0]
+    # Merge the rotated content on top of the background
+    background_page.merge_page(content_page)
 
-        # Merge the overlay with the original page
-        original_page.merge_page(overlay_page)
-        writer.add_page(original_page)
+    # Write the output
+    pdf_writer = PyPDF2.PdfWriter()
+    pdf_writer.add_page(background_page)
+    with open(output_pdf, 'wb') as output_file:
+        pdf_writer.write(output_file)
 
-    # Write the output PDF
-    with open(output_pdf_path, "wb") as output_file:
-        writer.write(output_file)
+# Merge the PDFs with rotation
+merge_pdfs("Card_Scan.pdf", "content_pdf.pdf", "merged_pdf.pdf")
 
-# Usage
-original_pdf_path = "cards.pdf"
-output_pdf_path = "output.pdf"
+lines = [
+    "","", "", "Springfield, IL 62704",
+    "","", "", "Metropolis, IL 62960",
+    "","", "", "Gotham, NY 10001"
+]
 
+create_multiline_pdf("content_pdf.pdf", lines,.50, font_size=9)
 
-get_pdf_dimensions(original_pdf_path)
+merge_pdfs("merged_pdf.pdf", "content_pdf.pdf", "merged_pdf.pdf")
 
-# Coordinates where you want to place the text (in points)
-x, y = (612*.12), (792*.12)
-
-# Create overlay PDF
-overlay = create_overlay("Hello, World!", x, y)
-
-# Merge overlay with original PDF
-merge_pdfs(original_pdf_path, output_pdf_path, overlay)

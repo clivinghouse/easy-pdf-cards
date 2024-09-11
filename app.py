@@ -42,14 +42,10 @@ def create_multiline_pdf(file_name, lines, x, font_name="Helvetica", font_size=1
     c.save()
 
 # Define the lines with names, addresses, and city/state/zip
-lines = [
-"John Doe", "1234 Elm Street", "Springfield, IL 62704","",
-"Jane Smith", "5678 Oak Avenue", "Metropolis, IL 62960","",
-    "Alice Johnson", "9101 Maple Lane", "Gotham, NY 10001",""
-]
+
 
 # Create the content PDF with rotated text
-create_multiline_pdf("content_pdf.pdf", lines,.035, font_size=9)
+# create_multiline_pdf("content_pdf.pdf", lines,.035, font_size=9)
 
 
 
@@ -77,15 +73,25 @@ def merge_pdfs(background_pdf, content_pdf, output_pdf):
         pdf_writer.write(output_file)
 
 # Merge the PDFs with rotation
+
+Blank_lines_init = [
+    "","", "", "",
+]
+create_multiline_pdf("content_pdf.pdf", Blank_lines_init,0, font_size=9)
 merge_pdfs("Card_Scan.pdf", "content_pdf.pdf", "merged_pdf.pdf")
+def add_to_pdf(position, content):
+    create_multiline_pdf("content_pdf.pdf", content,position, font_size=9)
+    merge_pdfs("merged_pdf.pdf", "content_pdf.pdf", "merged_pdf.pdf")
 
 lines = [
-    "","", "", "Springfield, IL 62704",
-    "","", "", "Metropolis, IL 62960",
-    "","", "", "Gotham, NY 10001"
+"John Doe", "1234 Elm Street", "Springfield, IL 62704","",
+"Jane Smith", "5678 Oak Avenue", "Metropolis, IL 62960","",
+    "Alice Johnson", "9101 Maple Lane", "Gotham, NY 10001",""
 ]
+add_to_pdf(.035, lines)
 
-create_multiline_pdf("content_pdf.pdf", lines,.50, font_size=9)
+add_to_pdf(.5, lines)
 
-merge_pdfs("merged_pdf.pdf", "content_pdf.pdf", "merged_pdf.pdf")
+
+# merge_pdfs("merged_pdf.pdf", "content_pdf.pdf", "merged_pdf.pdf")
 

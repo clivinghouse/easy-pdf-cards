@@ -6,7 +6,7 @@ def create_multiline_pdf(file_name, lines, x, font_name="Helvetica", font_size=1
     # Set up the canvas with landscape orientation
     c = canvas.Canvas(file_name, pagesize=landscape(letter))
     width, height = landscape(letter)
-    
+    print(width,height)
     # Set the font name and size
     c.setFont(font_name, font_size)
     

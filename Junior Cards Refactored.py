@@ -1,10 +1,10 @@
 import fitz  
 import csv
-# filename = 'blank_port.pdf'
-# doc = fitz.open(filename)  # open PDF with PyMuPDF
+filename = 'blank_port.pdf'
+doc = fitz.open(filename)  # open PDF with PyMuPDF
 
-# page = doc[0]
-# page.set_rotation(90)
+page = doc[0]
+page.set_rotation(90)
 
 #offsets
 card1offset = 4
@@ -123,7 +123,6 @@ with open('jr-members.csv', newline='') as csvfile:
         printRow(page, card2offset, f'{g[1]} {g[3]}', g[4], g[5], f'{g[6]}, {g[7]} {g[8]}', False, False, False, "")
         printRow(page, card3offset, f'{b[1]} {b[3]}', b[4], b[5], f'{b[6]}, {b[7]} {b[8]}', False, False, False, "")
         printRow(page, card4offset, f'{a[1]} {a[3]}', a[4], a[5], f'{a[6]}, {a[7]} {a[8]}', False, False, False, "")
-        page = doc._newPage(height=775,width=595)
         
         i = i+1
        

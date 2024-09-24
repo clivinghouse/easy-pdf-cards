@@ -1,11 +1,10 @@
 import fitz  
 import csv
+# filename = 'blank_port.pdf'
+# doc = fitz.open(filename)  # open PDF with PyMuPDF
 
-filename = 'Card_Scan.pdf'
-doc = fitz.open(filename)  # open PDF with PyMuPDF
-
-page = doc[0]
-page.set_rotation(90)
+# page = doc[0]
+# page.set_rotation(90)
 
 #offsets
 card1offset = 4
@@ -109,22 +108,23 @@ def printRow(page, offset, name, addr1, addr2, addr3, LM, SC, ML, member):
     point = fitz.Point(65 + offset, 170) 
     page.insert_text(point, member, rotate=90, fontsize = 20)
 
+i=0
 with open('jr-members.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-    i = 0
-    print(page.rect.width, page.rect.height)
+    
     for r,g,b,a in zip(*[iter(spamreader)]*4):
-        # print(r,g,b,a)
-        # print("Group of 4")
+        filename = 'blank_port.pdf'
+        doc = fitz.open(filename)  # open PDF with PyMuPDF
+
+        page = doc[0]
+        page.set_rotation(90)
+    
         printRow(page, card1offset, f'{r[1]} {r[3]}', r[4], r[5], f'{r[6]}, {r[7]} {r[8]}', False, False, False, "")
         printRow(page, card2offset, f'{g[1]} {g[3]}', g[4], g[5], f'{g[6]}, {g[7]} {g[8]}', False, False, False, "")
         printRow(page, card3offset, f'{b[1]} {b[3]}', b[4], b[5], f'{b[6]}, {b[7]} {b[8]}', False, False, False, "")
         printRow(page, card4offset, f'{a[1]} {a[3]}', a[4], a[5], f'{a[6]}, {a[7]} {a[8]}', False, False, False, "")
-        i = i+1
         page = doc._newPage(height=775,width=595)
         
-        page.set_rotation(90)
-
-
-
-doc.save("output.pdf")
+        i = i+1
+       
+        doc.save(f'./pdfs/output-{i}.pdf')

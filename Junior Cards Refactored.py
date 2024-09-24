@@ -1,5 +1,8 @@
 import fitz  
 import csv
+import os
+import time
+
 filename = 'blank_port.pdf'
 doc = fitz.open(filename)  # open PDF with PyMuPDF
 
@@ -127,3 +130,14 @@ with open('jr-members.csv', newline='') as csvfile:
         i = i+1
        
         doc.save(f'./pdfs/output-{i}.pdf')
+
+time.sleep(5)
+
+result = fitz.open()
+print(os.listdir('./pdfs/'))
+
+for pdf in os.listdir('./pdfs/'):
+    with fitz.open("./pdfs/" + pdf) as mfile:
+        result.insert_pdf(mfile)
+    
+result.save("./pdfs/result.pdf")
